@@ -1,5 +1,6 @@
 package cadastros;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +8,7 @@ public class PessoaDao extends Dao {
 	
 	public void incluirPessoa(Pessoa p) throws Exception {
 		open();
-		stmt = con.prepareStatement("insert into pessoa values (?,?,?)");
+		stmt = con.prepareStatement("insert into pessoa values(?,?,?)");
 		stmt.setInt(1, p.getIdPessoa());
 		stmt.setString(2, p.getNome());
 		stmt.setString(3, p.getEmail());
@@ -19,7 +20,7 @@ public class PessoaDao extends Dao {
 	
 	public void alterarPessoa(Pessoa p) throws Exception {
 		open();
-		stmt = con.prepareStatement("update Pessoa nome = ?, email = ? where idPessoa = ?");
+		stmt = con.prepareStatement("update Pessoa set nome = ?, email = ? where idpessoa = ?");
 		stmt.setString(1, p.getNome());
 		stmt.setString(2, p.getEmail());
 		stmt.setInt(3, p.getIdPessoa());
@@ -30,7 +31,7 @@ public class PessoaDao extends Dao {
 	
 	public void excluirPessoa(Pessoa p) throws Exception {
 		open();
-		stmt = con.prepareStatement("delete from Pessoa where idPessoa = ?");
+		stmt = con.prepareStatement("delete from Pessoa where idpessoa = ?");
 		stmt.setInt(1, p.getIdPessoa());
 		stmt.execute();
 		stmt.close();
@@ -39,15 +40,27 @@ public class PessoaDao extends Dao {
 	
 	public Pessoa consultarPessoaIndividual(int cod) throws Exception {
 		open();
-		stmt = con.prepareStatement("select * from pessoa where idPessoa = ? ");
-		rs = stmt.executeQuery();
+		stmt = con.prepareStatement("select * from pessoa where idpessoa = ? ");
+		stmt.setInt(1, cod);
+		try {
+			rs = stmt.executeQuery();
+		} catch (SQLException e) {
+			 throw new Exception(e);
+		} finally {
+			System.out.println("fechando conexao");
+			close();
+		}
+
 		Pessoa p = null;
+		if(rs != null) {
 		if(rs.next()) {
 			p = new Pessoa();
 			p.setIdPessoa(rs.getInt("idPessoa"));
 			p.setNome(rs.getString("nome"));
 			p.setEmail(rs.getString("email"));
 		}
+	}
+	
 		close();
 		return p;
 	}
@@ -60,7 +73,7 @@ public class PessoaDao extends Dao {
 			List<Pessoa> listaPessoas = new ArrayList<>();
 			while (rs.next()) {
 				Pessoa p = new Pessoa();
-				p.setIdPessoa(rs.getInt("idPessoa"));
+				p.setIdPessoa(rs.getInt("idpessoa"));
 				p.setNome(rs.getString("nome"));
 				p.setEmail(rs.getString("email"));
 				listaPessoas.add(p);
